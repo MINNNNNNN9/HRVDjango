@@ -1,6 +1,8 @@
 <template>
   <div class="register-page">
-    <!-- 主要內容 -->
+    <!-- 添加上方間距 -->
+    <div class="top-spacing"></div>
+    
     <div class="main-content">
       <div class="container">
         <div class="register-container">
@@ -93,7 +95,7 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-info">
-            <p>聯絡地址：112303 臺北市北投區明德路365號</p>
+            <p>聯絡地址：112303 臺北市北投區明德路365號 學思樓10樓 F1033 生醫資訊實驗室</p>
             <p>服務電話：(02)2822-7101 轉 1237</p>
             <p>本平台服務時間：週一至週五 09:00-18:00</p>
           </div>
@@ -148,20 +150,25 @@ export default {
 <style scoped>
 .register-page {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #f5f5f5;
+  background: var(--neutral-100);
 }
 
-/* 使用與 Login.vue 相同的樣式 */
+/* 添加上方間距 */
+.top-spacing {
+  height: 80px; /* 調整這個值可以改變表單距離頂部的距離 */
+}
+
 .main-content {
-  flex: 1;
-  padding: 3rem 0;
+  padding: 2rem 0;
 }
 
 .register-container {
-  max-width: 600px;
+  max-width: 480px;
   margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .register-header {

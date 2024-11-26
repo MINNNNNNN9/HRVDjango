@@ -102,7 +102,7 @@ export default {
 <style scoped>
 /* 導航欄初始狀態 */
 .navbar {
-  background: transparent; /* 初始透明背景 */
+  background: rgba(26, 41, 66, 0.98);  /* 初始透明背景 */
   backdrop-filter: blur(12px);
   position: fixed;
   width: 100%;

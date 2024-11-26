@@ -1,12 +1,13 @@
 <template>
   <div class="login-page">
-    <!-- 主要內容 -->
+    <div class="top-spacing"></div>
+    
     <div class="main-content">
       <div class="container">
         <div class="login-container">
           <div class="login-header">
             <h2>會員登入</h2>
-            <p>歡迎使用 HRV 睡眠檢測平台</p>
+            <p>歡迎回到 HRV 睡眠檢測平台</p>
           </div>
           
           <div class="login-box">
@@ -70,8 +71,8 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-info">
-            <p>聯絡地址：100 台北市中正區重慶南路一段122號</p>
-            <p>服務電話：(02)2345-6789</p>
+            <p>聯絡地址：112303 臺北市北投區明德路365號 學思樓10樓 F1033 生醫資訊實驗室</p>
+            <p>服務電話：(02)2822-7101 轉 1237</p>
             <p>本平台服務時間：週一至週五 09:00-18:00</p>
           </div>
         </div>
@@ -116,19 +117,24 @@ export default {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #f5f5f5;
+  background: var(--neutral-100);
+}
+
+.top-spacing {
+  height: 80px;
 }
 
 .main-content {
-  flex: 1;
-  padding: 3rem 0;
+  padding: 2rem 0;
 }
 
 .login-container {
-  max-width: 600px;
+  max-width: 480px;
   margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .login-header {
@@ -137,13 +143,13 @@ export default {
 }
 
 .login-header h2 {
-  color: #1a4f7b;
-  font-size: 2rem;
+  font-size: 1.8rem;
+  color: var(--primary-dark);
   margin-bottom: 0.5rem;
 }
 
 .login-header p {
-  color: #666;
+  color: var(--neutral-400);
 }
 
 .login-box {
