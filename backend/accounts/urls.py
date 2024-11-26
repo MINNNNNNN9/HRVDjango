@@ -1,16 +1,9 @@
-from django.contrib import admin
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from accounts.views import landing, register, SleepRecordViewSet, HRVDataViewSet
-
-router = DefaultRouter()
-router.register(r'sleep-records', SleepRecordViewSet, basename='sleep-record')
-router.register(r'hrv-data', HRVDataViewSet, basename='hrv-data')
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('', landing, name='landing'),
-    path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api/auth/', include('rest_framework.urls')),
-    path('api/auth/register/', register, name='register'),
+    path('register/', views.register, name='register'),
+    path('login/', views.api_login, name='login'),
+    path('logout/', views.api_logout, name='logout'),
+    path('user/', views.api_user, name='user'),
 ]

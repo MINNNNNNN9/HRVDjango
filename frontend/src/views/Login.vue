@@ -1,113 +1,92 @@
 <template>
   <div class="login-page">
-    <div class="top-spacing"></div>
-    
-    <div class="main-content">
-      <div class="container">
-        <div class="login-container">
-          <div class="login-header">
-            <h2>會員登入</h2>
-            <p>歡迎回到 HRV 睡眠檢測平台</p>
+    <div class="geometric-elements">
+      <div class="geo-item square"></div>
+      <div class="geo-item circle"></div>
+      <div class="geo-item rectangle"></div>
+      <div class="geo-item square-small"></div>
+      <div class="geo-item circle-small"></div>
+    </div>
+
+    <div class="content-container">
+      <div class="login-card">
+        <h2 class="login-title">使用者登入</h2>
+        <p class="login-subtitle">登入後進入睡眠監測系統</p>
+        
+        <form @submit.prevent="handleLogin" class="login-form">
+          <div class="input-group">
+            <input 
+              type="text"
+              v-model="form.username"
+              placeholder="請輸入帳號"
+              required
+            >
           </div>
-          
-          <div class="login-box">
-            <div v-if="error" class="error-message">
-              <i class="fas fa-exclamation-circle"></i>
-              {{ error }}
-            </div>
-            
-            <form @submit.prevent="handleLogin">
-              <div class="form-group">
-                <label for="username">
-                  <i class="fas fa-user"></i>
-                  帳號
-                </label>
-                <input 
-                  type="text" 
-                  id="username" 
-                  v-model="form.username" 
-                  required
-                  placeholder="請輸入帳號"
-                >
-              </div>
-              
-              <div class="form-group">
-                <label for="password">
-                  <i class="fas fa-lock"></i>
-                  密碼
-                </label>
-                <input 
-                  type="password" 
-                  id="password" 
-                  v-model="form.password" 
-                  required
-                  placeholder="請輸入密碼"
-                >
-              </div>
-              
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-sign-in-alt"></i>
-                  登入
-                </button>
-                <router-link to="/register" class="btn btn-outline">
-                  <i class="fas fa-user-plus"></i>
-                  註冊新帳號
-                </router-link>
-              </div>
-            </form>
-            
-            <div class="help-links">
-              <a href="#"><i class="fas fa-question-circle"></i> 忘記密碼</a>
-              <a href="#"><i class="fas fa-info-circle"></i> 使用說明</a>
-            </div>
+
+          <div class="input-group">
+            <input 
+              type="password"
+              v-model="form.password"
+              placeholder="請輸入密碼"
+              required
+            >
           </div>
+
+          <button type="submit" class="login-btn">登入</button>
+        </form>
+
+        <div class="form-footer">
+          <router-link to="/register" class="register-link">註冊帳號</router-link>
+          <a href="#" class="help-link">登入說明</a>
         </div>
       </div>
     </div>
-
-    <!-- 頁尾 -->
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-info">
-            <p>聯絡地址：112303 臺北市北投區明德路365號 學思樓10樓 F1033 生醫資訊實驗室</p>
-            <p>服務電話：(02)2822-7101 轉 1237</p>
-            <p>本平台服務時間：週一至週五 09:00-18:00</p>
-          </div>
-        </div>
-        <div class="copyright">
-          Copyright © 2024 HRV Sleep Monitoring Platform. All rights reserved.
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
-  name: 'LoginView',
+  name: 'LoginForm',
   data() {
     return {
       form: {
         username: '',
         password: ''
       },
-      error: null
+      error: ''
     }
   },
   methods: {
     async handleLogin() {
       try {
-        const response = await axios.post('/api/login/', this.form)
-        if (response.data.success) {
-          localStorage.setItem('token', response.data.token)
-          this.$router.push('/home')
+        this.error = '';
+        
+        console.log('準備發送登入請求：', {
+          username: this.form.username,
+          password: this.form.password
+        });
+
+        const response = await this.$axios.post('/api/auth/login/', {
+          username: this.form.username,
+          password: this.form.password
+        });
+
+        console.log('登入響應：', response);
+
+        if (response.data) {
+          // 登入成功，儲存用戶資訊
+          this.$store.commit('setUser', response.data.user);
+          this.$router.push('/');
         }
       } catch (error) {
-        this.error = '帳號或密碼錯誤'
+        console.error('登入錯誤：', error);
+        if (error.response) {
+          this.error = error.response.data.message || '登入失敗';
+        } else if (error.request) {
+          this.error = '無法連接到伺服器，請檢查網路連接';
+        } else {
+          this.error = '登入過程發生錯誤，請稍後再試';
+        }
       }
     }
   }
@@ -117,167 +96,225 @@ export default {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: var(--neutral-100);
+  background: #1E2128;
+  color: white;
+  display: flex;
+  flex-direction: column;
 }
 
-.top-spacing {
-  height: 80px;
-}
-
-.main-content {
+.platform-title {
+  text-align: center;
   padding: 2rem 0;
 }
 
-.login-container {
-  max-width: 480px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.login-header h2 {
-  font-size: 1.8rem;
-  color: var(--primary-dark);
+.platform-title h1 {
+  color: #8BC34A;
+  font-size: 3rem;
   margin-bottom: 0.5rem;
 }
 
-.login-header p {
-  color: var(--neutral-400);
+.platform-title p {
+  color: #666;
+  font-size: 1.2rem;
 }
 
-.login-box {
-  background: #fff;
+.content-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1;
 }
 
-.form-group {
+.login-card {
+  background: rgba(40, 44, 52, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 3rem;
+  border-radius: 12px;
+  width: 400px;
+  border: 1px solid rgba(139, 195, 74, 0.2);
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2),
+              0 0 10px rgba(139, 195, 74, 0.1);
+}
+
+.login-title {
+  color: #8BC34A;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.login-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.input-group {
   margin-bottom: 1.5rem;
 }
 
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 500;
-}
-
-label i {
-  margin-right: 0.5rem;
-  color: #1a4f7b;
-}
-
-input {
+.input-group input {
   width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(139, 195, 74, 0.5);
+  border-radius: 6px;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #8BC34A;
+  box-shadow: 0 0 10px rgba(139, 195, 74, 0.2);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #8BC34A;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: #9CCC65;
+  transform: translateY(-2px);
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
   font-size: 1rem;
 }
 
-input:focus {
-  outline: none;
-  border-color: #1a4f7b;
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.btn {
-  flex: 1;
-  padding: 0.8rem;
-  border-radius: 4px;
-  border: none;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+.form-footer a {
+  color: #8BC34A;
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-.btn-primary {
-  background: #1a4f7b;
-  color: #fff;
+.form-footer a:hover {
+  color: #9CCC65;
 }
 
-.btn-outline {
-  background: #fff;
-  border: 1px solid #1a4f7b;
-  color: #1a4f7b;
+.geometric-elements {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.help-links {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
+.geo-item {
+  position: absolute;
+  border: 1px solid rgba(139, 195, 74, 0.15);
+  opacity: 1.85;
 }
 
-.help-links a {
-  color: #666;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.square {
+  width: 100px;
+  height: 100px;
+  top: 20%;
+  left: 15%;
+  animation: floatAnimation 8s infinite ease-in-out;
 }
 
-.error-message {
-  background: #fff3f3;
-  color: #dc3545;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  top: 60%;
+  right: 15%;
+  animation: floatAnimation 10s infinite ease-in-out;
 }
 
-.footer {
-  background: #1a4f7b;
-  color: #fff;
-  padding: 2rem 0;
-  margin-top: auto;
+.rectangle {
+  width: 150px;
+  height: 80px;
+  top: 40%;
+  right: 25%;
+  animation: floatAnimation 12s infinite ease-in-out;
 }
 
-.footer-content {
-  margin-bottom: 1rem;
+.square-small {
+  width: 60px;
+  height: 60px;
+  bottom: 20%;
+  left: 25%;
+  animation: floatAnimation 9s infinite ease-in-out;
 }
 
-.copyright {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 0.9rem;
+.circle-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  top: 30%;
+  right: 35%;
+  animation: floatAnimation 11s infinite ease-in-out;
+}
+
+@keyframes floatAnimation {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-10px, 10px) rotate(5deg);
+  }
+  50% {
+    transform: translate(0, -15px) rotate(0deg);
+  }
+  75% {
+    transform: translate(10px, 5px) rotate(-5deg);
+  }
+}
+
+.geo-item::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: inherit;
+  background: rgba(139, 195, 74, 0.1);
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.geo-item:hover::after {
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
-  .main-content {
-    padding: 2rem 1rem;
+  .login-card {
+    width: 90%;
+    padding: 2rem;
   }
   
-  .form-actions {
-    flex-direction: column;
+  .platform-title h1 {
+    font-size: 2rem;
   }
   
-  .help-links {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
+  .platform-title p {
+    font-size: 1rem;
+  }
+
+  .geometric-elements {
+    display: none;
   }
 }
 </style>

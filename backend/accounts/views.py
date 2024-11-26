@@ -56,22 +56,40 @@ def landing(request):
 @throttle_classes([RegisterThrottle])
 def register(request):
     try:
+        logger.info(f"收到註冊請求：{request.data}")
+        
+        required_fields = ['username', 'email', 'password', 'confirm_password']
+        for field in required_fields:
+            if field not in request.data:
+                logger.error(f"缺少必要欄位：{field}")
+                return Response({
+                    'message': f'缺少必要欄位：{field}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = UserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
+        if serializer.is_valid():
             user = serializer.save()
-            logger.info(f"New user registered: {user.username}")
+            logger.info(f"用戶註冊成功：{user.username}")
             return Response({
-                'status': 'success',
                 'message': '註冊成功',
-                'user': UserSerializer(user).data
+                'user': {
+                    'username': user.username,
+                    'email': user.email
+                }
             }, status=status.HTTP_201_CREATED)
+        else:
+            logger.error(f"序列化器驗證失敗：{serializer.errors}")
+            return Response({
+                'message': '註冊資料驗證失敗',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
     except Exception as e:
-        logger.error(f"Registration error: {str(e)}")
+        logger.error(f"註冊過程發生錯誤：{str(e)}")
         return Response({
-            'status': 'error',
-            'message': '註冊失敗',
-            'errors': str(e)
-        }, status=status.HTTP_400_BAD_REQUEST)
+            'message': '註冊過程發生錯誤',
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -79,24 +97,37 @@ def api_login(request):
     try:
         username = request.data.get('username')
         password = request.data.get('password')
+        
+        logger.info(f"嘗試登入用戶：{username}")
+        
+        if not username or not password:
+            return Response({
+                'message': '請提供用戶名和密碼'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         user = authenticate(username=username, password=password)
         
         if user:
             login(request, user)
-            logger.info(f"User logged in: {username}")
+            logger.info(f"用戶登入成功：{username}")
             return Response({
-                'success': True,
-                'user': UserSerializer(user).data
+                'message': '登入成功',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                }
             })
-        return Response({
-            'success': False,
-            'message': '用戶名或密碼錯誤'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.warning(f"登入失敗：用戶名或密碼錯誤 - {username}")
+            return Response({
+                'message': '用戶名或密碼錯誤'
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
     except Exception as e:
-        logger.error(f"Login error: {str(e)}")
+        logger.error(f"登入過程發生錯誤：{str(e)}")
         return Response({
-            'success': False,
-            'message': '登入失敗'
+            'message': '登入過程發生錯誤'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
